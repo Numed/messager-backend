@@ -8,7 +8,7 @@ const app = express();
 
 app.use(express.json({ extended: true }));
 app.use(cors());
-app.use("messanger/api", require("./routes/auth.routes"));
+app.use("/messanger/api", require("./routes/auth.routes"));
 
 const start = async () => {
   try {
