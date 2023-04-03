@@ -86,7 +86,7 @@ router.post(
       });
       await createUser.save();
 
-      const token = jwt.sign({ userId: user.id }, process.env.secret, {
+      const token = jwt.sign({ userId: createUser.id }, process.env.secret, {
         expiresIn: "1h",
       });
       res.status(201).json({ message: "User is created", token, name, email });
@@ -117,12 +117,28 @@ router.post(
 
       const user = await User.findOne({ email });
 
-      if (user) {
+      if (
+        user &&
+        !user.loginedByGitHub &&
+        !user.loginedByFacebook &&
+        !user.loginedByGoogle
+      ) {
+        return res.status(400).json({
+          message: "The current user had an account with the same email",
+        });
+      }
+
+      if (
+        (user && user.loginedByGitHub) ||
+        (user && user.loginedByFacebook) ||
+        (user && user.loginedByGoogle)
+      ) {
+        const token = jwt.sign({ userId: user.id }, process.env.secret, {
+          expiresIn: "1h",
+        });
         return res
-          .status(400)
-          .json({
-            message: "The current user had an account with the same email",
-          });
+          .status(201)
+          .json({ message: "User is founded", name, email, image, token });
       }
 
       const createUser = new User({
@@ -208,6 +224,42 @@ router.post(
         token,
         name: user.name,
         image: user.image,
+      });
+    } catch (e) {
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  }
+);
+
+router.post(
+  "/updateMessages",
+  [
+    check("email", "Not valid email").isEmail(),
+    check("messages", "Not valid messages").isArray(),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          errors: errors.array(),
+          message: "Not valid name or img",
+        });
+      }
+      const { email, messages } = req.body;
+
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        return res.status(400).json({ message: "User not found" });
+      }
+
+      await User.updateOne({ email }, { $set: { messages: messages } });
+
+      res.status(202).json({
+        message: "User is updated",
+        name,
+        image,
       });
     } catch (e) {
       res.status(500).json({ message: "Something went wrong" });
