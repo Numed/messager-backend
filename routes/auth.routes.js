@@ -45,6 +45,7 @@ router.post(
         name: user.name,
         email: user.email,
         image: user.image,
+        messages: user.messages,
       });
     } catch (e) {
       res.status(500).json({ message: "Something went wrong" });
@@ -221,9 +222,11 @@ router.post(
 
       res.status(200).json({
         message: "User exist",
+        email: user.email,
         token,
         name: user.name,
         image: user.image,
+        messages: user.messages,
       });
     } catch (e) {
       res.status(500).json({ message: "Something went wrong" });
@@ -235,7 +238,8 @@ router.post(
   "/updateMessages",
   [
     check("email", "Not valid email").isEmail(),
-    check("messages", "Not valid messages").isArray(),
+    check("historyMessages", "Not valid history messages").isArray(),
+    check("historyOrder", "Not valid sorted list").isArray(),
   ],
   async (req, res) => {
     try {
@@ -243,10 +247,10 @@ router.post(
       if (!errors.isEmpty()) {
         return res.status(400).json({
           errors: errors.array(),
-          message: "Not valid name or img",
+          message: "Not valid data received",
         });
       }
-      const { email, messages } = req.body;
+      const { email, historyMessages, historyOrder } = req.body;
 
       const user = await User.findOne({ email });
 
@@ -254,12 +258,13 @@ router.post(
         return res.status(400).json({ message: "User not found" });
       }
 
-      await User.updateOne({ email }, { $set: { messages: messages } });
+      await User.updateOne(
+        { email },
+        { $set: { messages: { historyMessages, historyOrder } } }
+      );
 
       res.status(202).json({
-        message: "User is updated",
-        name,
-        image,
+        message: "Messages is updated",
       });
     } catch (e) {
       res.status(500).json({ message: "Something went wrong" });

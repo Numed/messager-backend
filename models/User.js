@@ -20,7 +20,7 @@ const User = new Schema({
     type: String,
   },
   messages: {
-    type: Array,
+    type: Object,
   },
   loginedByGoogle: {
     type: Boolean,
