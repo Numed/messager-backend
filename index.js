@@ -1,10 +1,18 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const http = require("http");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
 const app = express();
+const server = http.createServer(app);
+const io = require("socket.io")(server, {
+  cors: {
+    origin: process.env.clientBase,
+    methods: ["GET", "POST"],
+  },
+});
 
 app.use(express.json({ extended: true }));
 app.use(cors());
@@ -21,7 +29,19 @@ const start = async () => {
   }
 };
 
-app.listen(PORT, () => {
+io.on("connection", (socket) => {
+  console.log(`⚡: ${socket.id} user just connected!`);
+
+  socket.on("socketSubmit", (data) => {
+    io.emit("messageResponse", data);
+  });
+
+  socket.on("disconnect", () => {
+    socket.disconnect();
+  });
+});
+
+server.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
 
