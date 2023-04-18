@@ -30,10 +30,8 @@ const start = async () => {
 };
 
 io.on("connection", (socket) => {
-  console.log(`⚡: ${socket.id} user just connected!`);
-
   socket.on("socketSubmit", (data) => {
-    io.emit("messageResponse", data);
+    io.emit("messageResponse", { ...data, isBot: true });
   });
 
   socket.on("disconnect", () => {
