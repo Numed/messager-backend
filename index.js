@@ -14,7 +14,7 @@ const io = require("socket.io")(server, {
   },
 });
 
-app.use(express.json({ extended: true }));
+app.use(express.json({ extended: true, limit: "50mb" }));
 app.use(cors());
 app.use("/messanger/api", require("./routes/auth.routes"));
 
