@@ -18,6 +18,7 @@ app.use(express.json({ extended: true, limit: "50mb" }));
 app.use(cors());
 app.use("/messanger/api", require("./routes/auth.routes"));
 
+
 const start = async () => {
   try {
     await mongoose.connect(process.env.mongoURI, {
