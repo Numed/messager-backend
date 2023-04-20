@@ -12,6 +12,9 @@ const io = require("socket.io")(server, {
   cors: {
     origin: process.env.clientBase,
     methods: ["GET", "POST"],
+    allowedHeaders: ["*"],
+    transports: ["websocket", "polling"],
+    credentials: true,
   },
 });
 
