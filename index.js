@@ -35,7 +35,7 @@ const start = async () => {
 
 io.on("connection", (socket) => {
   socket.on("socketSubmit", (data) => {
-    socket.emit("messageResponse", { ...data, isBot: true });
+    socket.broadcast.emit("messageResponse", { ...data, isBot: true });
   });
 
   socket.on("disconnect", () => {
